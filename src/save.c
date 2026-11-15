@@ -25,6 +25,7 @@ void init_sram() {
 		save_data.p2_col_selected = DEFAULT_P2_COLOR;
 		save_data.glow_col_selected = DEFAULT_GLOW_COLOR;
 		save_data.glow_enabled = FALSE;
+		save_data.ldm_enabled = FALSE;
 		
 		write_save_block();
 	}else if (save_data.level_version != LEVEL_VERSION) {

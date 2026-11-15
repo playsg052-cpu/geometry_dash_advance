@@ -9,6 +9,7 @@
 #include "color.h"
 #include "../graphics/includes.h"
 #include "level_routines.h"
+#include "save.h"
 
 
 u16 *sprite_pointer;
@@ -66,6 +67,71 @@ ARM_CODE s32 get_free_chr_slot_id(u32 rom_offset) {
     }
     
     return available;
+}
+
+// Decoration-only objects (no collision). Skipped when Low Detail Mode is enabled.
+// Edit this list to change what LDM removes.
+u32 is_ldm_hidden_object(u16 type) {
+    switch (type) {
+        // Spinning circle / saw / flower / hexagon decorations
+        case BIG_SAW_DECO:
+        case MEDIUM_SAW_DECO:
+        case SMALL_SAW_DECO:
+        case TINY_SAW_DECO:
+        case BIG_CIRCUNFERENCE_SAW_DECO:
+        case MED_CIRCUNFERENCE_SAW_DECO:
+        case SMA_CIRCUNFERENCE_SAW_DECO:
+        case BIG_CIRCLE_SAW_DECO:
+        case MEDIUM_CIRCLE_SAW_DECO:
+        case SMALL_CIRCLE_SAW_DECO:
+        case BIG_SPIKE_SAW_DECO:
+        case MEDIUM_SPIKE_SAW_DECO:
+        case SMALL_SPIKE_SAW_DECO:
+        case BIG_ROTATING_FLOWER:
+        case MEDIUM_ROTATING_FLOWER:
+        case SMALL_ROTATING_FLOWER:
+        case BIG_ROTATING_HEXAGON:
+        case MEDIUM_ROTATING_HEXAGON:
+        case SMALL_ROTATING_HEXAGON:
+        case BIG_1_8_ROTATION_DECO:
+        case MEDIUM_1_8_ROTATION_DECO:
+        case SMALL_1_8_ROTATION_DECO:
+        case TINY_1_8_ROTATION_DECO:
+        // Other unnecessary background decoration
+        case BIG_BG_SPIKES:
+        case MEDIUM_BG_SPIKES:
+        case SMALL_BG_SPIKES:
+        case TINY_BG_SPIKES:
+        case BG_CHAINS:
+        case SMALL_BG_CHAINS:
+        case SMALL_WIDE_BG_CHAINS:
+        case BIG_WIDE_BG_CHAINS:
+        case DIAMOND_BG_CHAINS:
+        case SMALL_DIAMOND_BG_CHAINS:
+        case BIG_BG_CLOUDS:
+        case SMALL_BG_CLOUDS:
+        case BIG_CLOUD:
+        case MEDIUM_CLOUD:
+        case SMALL_CLOUD:
+        case BIG_BG_SQUARES:
+        case MEDIUM_BG_SQUARES:
+        case SMALL_BG_SQUARES:
+        case BUSH_DECO_1:
+        case BUSH_DECO_2:
+        case BUSH_DECO_3:
+        case BUSH_DECO_4:
+        case BUSH_DECO_5:
+        case BUSH_DECO_6:
+        case BIG_1_9_BUSH:
+        case MEDIUM_1_9_BUSH:
+        case SMALL_1_9_BUSH:
+        case BIG_DECO_TRIANGLE:
+        case MEDIUM_DECO_TRIANGLE:
+        case SMALL_DECO_TRIANGLE:
+            return TRUE;
+        default:
+            return FALSE;
+    }
 }
 
 void load_objects(u32 load_chr, u32 loading_level) {
@@ -197,6 +263,12 @@ void load_objects(u32 load_chr, u32 loading_level) {
                         
                         // If an invalid object was found, skip it
                         if (new_object.type >= OBJ_COUNT) {
+                            continue;
+                        }
+
+                        // Low Detail Mode: drop decoration objects and reuse this slot
+                        if (save_data.ldm_enabled && is_ldm_hidden_object(new_object.type)) {
+                            index--;
                             continue;
                         }
                         
