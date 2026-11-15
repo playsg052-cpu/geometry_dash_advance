@@ -28,6 +28,7 @@ struct SaveBlock {
     u16 p2_col_selected;
     u16 glow_col_selected;
     u8 glow_enabled;
+    u8 ldm_enabled; // Low Detail Mode (hides decoration objects)
     u32 endless_distance;
 
     struct SaveLevelData saved_levels[LEVEL_COUNT];
